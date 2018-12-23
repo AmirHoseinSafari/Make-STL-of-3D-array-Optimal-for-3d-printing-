@@ -1,6 +1,6 @@
 % LOADING DATA
 arr = load('example.mat');
-Data = arr.a; 
+Data = arr.Data; 
 
 scaleX = 0.084;
 scaleY = 0.084;
