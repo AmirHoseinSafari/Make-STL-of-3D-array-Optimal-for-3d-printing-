@@ -48,12 +48,16 @@ function [Vertices, Triangle, Quads] = make_STL_of_Array(FileName,Data,scaleX,sc
     Vertices_Pointer = 1;
     Quads_Pointer = 1;
     Triangle_Pointer = 1;
-    
+    GoIn3D = 0;
+    ZlayerVertexNum = 0;
+    PrevZlayerVertexNum = 0;
+    PrevVertexPointer = 0;
 %======================================================
 %   LOOPING THROUGH EVERY ELEMENTS OF 3D LOGICAL ARRAY(Data)
 %======================================================
    
     for i3 = 1 : size(Data,3)
+        ZlayerVertexNum = 0;
         for i2 = 1 : size(Data,2)
             for i1 = 1 : size(Data,1)
                 % i1 and i2 will change inside a for loop so we use i11 and
@@ -120,7 +124,36 @@ function [Vertices, Triangle, Quads] = make_STL_of_Array(FileName,Data,scaleX,sc
                     V6 = [ (i11 + maxX) * scaleX , (i22 - 1) * scaleY, (i3) * scaleZ];
                     V7 = [ (i11 - 1) * scaleX , (i22 + maxY) * scaleY, (i3) * scaleZ];
                     V8 = [ (i11 + maxX) * scaleX , (i22 + maxY) * scaleY, (i3) * scaleZ];
-
+                    
+                    % CHCK IF IT CAN GO IN DEPTH OR NOT
+                    GoIn3D = 0;
+                    if PrevVertexPointer > 0
+                        for i4 = PrevVertexPointer - PrevZlayerVertexNum : 8 : Vertices_Pointer - 8
+                           if size(Vertices) > 0
+                              if Vertices(i4,1) == V1(1) && Vertices(i4,2) == V1(2)  
+                                  if Vertices(i4 + 1,1) == V2(1) && Vertices(i4 + 1,2) == V2(2)
+                                      if Vertices(i4 + 2,1) == V3(1) && Vertices(i4 + 2,2) == V3(2) 
+                                          if Vertices(i4 + 3,1) == V4(1) && Vertices(i4 + 3,2) == V4(2) 
+                                             GoIn3D = 1;
+                                             Vertices(i4 + 4,3) = Vertices(i4 + 4,3) + scaleZ;
+                                             Vertices(i4 + 5,3) = Vertices(i4 + 5,3) + scaleZ;
+                                             Vertices(i4 + 6,3) = Vertices(i4 + 6,3) + scaleZ;
+                                             Vertices(i4 + 7,3) = Vertices(i4 + 7,3) + scaleZ;
+                                             break;
+                                          end
+                                      end
+                                  end
+                               end 
+                           end
+                        end
+                    end
+                    
+                    if GoIn3D == 1
+                        continue;
+                    end
+                    
+                    ZlayerVertexNum = ZlayerVertexNum + 8;
+                    
                     if Vertices_Pointer == 0
                         Vertices = cat(1,Vertices,V1);
                     end
@@ -156,28 +189,35 @@ function [Vertices, Triangle, Quads] = make_STL_of_Array(FileName,Data,scaleX,sc
                     Vertices(Vertices_Pointer,:) = V8;
                     V_pointer8 = Vertices_Pointer;
                     Vertices_Pointer = Vertices_Pointer + 1;
-
-                    % CREATE THE QUADS AND ADD THEM TO Quads MATRIX
-                    % AND INCREAS THE Quads_Pointer
-                    Quads(Quads_Pointer,:) = [V_pointer1, V_pointer2, V_pointer3, V_pointer4];
-                    Quads_Pointer = Quads_Pointer + 1;
-                    Quads(Quads_Pointer,:) = [V_pointer5, V_pointer6, V_pointer7, V_pointer8];
-                    Quads_Pointer = Quads_Pointer + 1;
-                    Quads(Quads_Pointer,:) = [V_pointer5, V_pointer6, V_pointer1, V_pointer2];
-                    Quads_Pointer = Quads_Pointer + 1;
-                    Quads(Quads_Pointer,:) = [V_pointer3, V_pointer4, V_pointer7, V_pointer8];
-                    Quads_Pointer = Quads_Pointer + 1;
-                    Quads(Quads_Pointer,:) = [V_pointer5, V_pointer1, V_pointer7, V_pointer3];
-                    Quads_Pointer = Quads_Pointer + 1;
-                    Quads(Quads_Pointer,:) = [V_pointer2, V_pointer6, V_pointer4, V_pointer8];
-                    Quads_Pointer = Quads_Pointer + 1;
                 end
             end
         end
+        PrevZlayerVertexNum = ZlayerVertexNum;
+        PrevVertexPointer = Vertices_Pointer;
     end
     
-    % CUT THE UNUSED ELEMENTS OF MATRIXES
+    % CUT THE UNUSED ELEMENTS OF Vertices
     Vertices = Vertices(1:Vertices_Pointer - 1,:);
+    
+    % CREATE THE QUADS AND ADD THEM TO Quads MATRIX
+    % AND INCREAS THE Quads_Pointer
+    Quads_Pointer = 1;
+    for iInVertices = 1 : 8: size(Vertices)
+        Quads(Quads_Pointer,:) = [iInVertices, iInVertices + 1, iInVertices + 2, iInVertices + 3];
+        Quads_Pointer = Quads_Pointer + 1;
+        Quads(Quads_Pointer,:) = [iInVertices + 4, iInVertices + 5, iInVertices + 6, iInVertices + 7];
+        Quads_Pointer = Quads_Pointer + 1;
+        Quads(Quads_Pointer,:) = [iInVertices + 4, iInVertices + 5, iInVertices, iInVertices + 1];
+        Quads_Pointer = Quads_Pointer + 1;
+        Quads(Quads_Pointer,:) = [iInVertices + 2, iInVertices + 3, iInVertices + 6, iInVertices + 7];
+        Quads_Pointer = Quads_Pointer + 1;
+        Quads(Quads_Pointer,:) = [iInVertices + 4, iInVertices, iInVertices + 6, iInVertices + 2];
+        Quads_Pointer = Quads_Pointer + 1;
+        Quads(Quads_Pointer,:) = [iInVertices + 1, iInVertices + 5, iInVertices + 3, iInVertices + 7];
+        Quads_Pointer = Quads_Pointer + 1;
+    end
+    
+    % CUT THE UNUSED ELEMENTS OF Quads
     Quads = Quads(1:Quads_Pointer - 1,:);
     
     % REMOVE REPETITIOUS QUADS
@@ -196,4 +236,4 @@ function [Vertices, Triangle, Quads] = make_STL_of_Array(FileName,Data,scaleX,sc
     Triangle = Triangle(1:Triangle_Pointer - 1,:);
     
     % WRITE THE STL FILE
-    stlwrite(FileName, Triangle, Vertices);
+stlwrite(FileName, Triangle, Vertices);
