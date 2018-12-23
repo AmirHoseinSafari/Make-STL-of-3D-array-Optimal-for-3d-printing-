@@ -130,19 +130,13 @@ function [Vertices, Triangle, Quads] = make_STL_of_Array(FileName,Data,scaleX,sc
                     if PrevVertexPointer > 0
                         for i4 = PrevVertexPointer - PrevZlayerVertexNum : 8 : Vertices_Pointer - 8
                            if size(Vertices) > 0
-                              if Vertices(i4,1) == V1(1) && Vertices(i4,2) == V1(2)  
-                                  if Vertices(i4 + 1,1) == V2(1) && Vertices(i4 + 1,2) == V2(2)
-                                      if Vertices(i4 + 2,1) == V3(1) && Vertices(i4 + 2,2) == V3(2) 
-                                          if Vertices(i4 + 3,1) == V4(1) && Vertices(i4 + 3,2) == V4(2) 
-                                             GoIn3D = 1;
-                                             Vertices(i4 + 4,3) = Vertices(i4 + 4,3) + scaleZ;
-                                             Vertices(i4 + 5,3) = Vertices(i4 + 5,3) + scaleZ;
-                                             Vertices(i4 + 6,3) = Vertices(i4 + 6,3) + scaleZ;
-                                             Vertices(i4 + 7,3) = Vertices(i4 + 7,3) + scaleZ;
-                                             break;
-                                          end
-                                      end
-                                  end
+                              if Vertices(i4,1) == V1(1) && Vertices(i4,2) == V1(2) && Vertices(i4 + 1,1) == V2(1) && Vertices(i4 + 1,2) == V2(2) && Vertices(i4 + 2,1) == V3(1) && Vertices(i4 + 2,2) == V3(2) && Vertices(i4 + 3,1) == V4(1) && Vertices(i4 + 3,2) == V4(2)  
+                                  GoIn3D = 1;
+                                  Vertices(i4 + 4,3) = Vertices(i4 + 4,3) + scaleZ;
+                                  Vertices(i4 + 5,3) = Vertices(i4 + 5,3) + scaleZ;
+                                  Vertices(i4 + 6,3) = Vertices(i4 + 6,3) + scaleZ;
+                                  Vertices(i4 + 7,3) = Vertices(i4 + 7,3) + scaleZ;
+                                  break;
                                end 
                            end
                         end
